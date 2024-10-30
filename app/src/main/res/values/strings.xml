@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Currenc-Converter</string>
+    <string name="amount_hint">Amount</string>
+    <string name="last_updated">Rates last updated: %1$s</string>
+    <string name="error_invalid_number">Please enter a valid number.</string>
+    <string name="error_failed_update">Failed to update rates.</string>
 </resources>
