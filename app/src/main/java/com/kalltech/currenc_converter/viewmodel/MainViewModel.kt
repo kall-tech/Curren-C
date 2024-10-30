@@ -17,6 +17,8 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
     val convertedAmounts = MutableLiveData<List<String>>(listOf("", "", ""))
     val lastUpdateTime = MutableLiveData<String>()
     val errorMessage = MutableLiveData<String>()
+    val ratesInfo = MutableLiveData<String>()
+
 
     private var exchangeRates: List<ExchangeRateEntity> = emptyList()
 
@@ -37,6 +39,11 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
             } else {
                 exchangeRates = repository.getCachedRates()
                 updateLastUpdateTime()
+                // Update rates info
+                val ratesSummary = exchangeRates.joinToString(separator = "\n") {
+                    "${it.currencyCode}: ${it.rate}"
+                }
+                ratesInfo.postValue(ratesSummary)
             }
         }
     }
