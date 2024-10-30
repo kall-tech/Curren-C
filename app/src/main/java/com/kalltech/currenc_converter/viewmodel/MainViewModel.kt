@@ -25,9 +25,9 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
     init {
         // Set default currencies
         selectedCurrencies.value = listOf(
-            Currency("EUR", "Euro"),
-            Currency("USD", "United States Dollar"),
-            Currency("AUD", "Australian Dollar")
+            Currency("EUR", "Euro", "€"),
+            Currency("USD", "United States Dollar", "$"),
+            Currency("AUD", "Australian Dollar", "AU$")
         )
 
         // Load exchange rates

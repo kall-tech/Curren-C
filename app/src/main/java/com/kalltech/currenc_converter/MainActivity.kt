@@ -19,6 +19,7 @@ import android.widget.AutoCompleteTextView
 import com.kalltech.currenc_converter.network.ApiClient
 import com.kalltech.currenc_converter.repository.ExchangeRateRepository
 import com.kalltech.currenc_converter.utils.Constants
+import com.kalltech.currenc_converter.utils.CurrencyUtils
 import com.kalltech.currenc_converter.viewmodel.MainViewModel
 import com.google.android.material.snackbar.Snackbar
 
