@@ -24,10 +24,18 @@
             android:hint="Amount"
             android:inputType="numberDecimal" />
 
-        <Spinner
-            android:id="@+id/currencySpinner1"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp">
+
+            <AutoCompleteTextView
+                android:id="@+id/currencyAutoComplete1"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:hint="Currency" />
+        </com.google.android.material.textfield.TextInputLayout>
+
     </LinearLayout>
 
     <!-- Currency Input 2 -->
@@ -49,10 +57,18 @@
             android:hint="Amount"
             android:inputType="numberDecimal" />
 
-        <Spinner
-            android:id="@+id/currencySpinner2"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp">
+
+            <AutoCompleteTextView
+                android:id="@+id/currencyAutoComplete2"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:hint="Currency" />
+        </com.google.android.material.textfield.TextInputLayout>
+
     </LinearLayout>
 
     <!-- Currency Input 3 -->
@@ -74,10 +90,18 @@
             android:hint="Amount"
             android:inputType="numberDecimal" />
 
-        <Spinner
-            android:id="@+id/currencySpinner3"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp">
+
+            <AutoCompleteTextView
+                android:id="@+id/currencyAutoComplete3"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:hint="Currency" />
+        </com.google.android.material.textfield.TextInputLayout>
+
     </LinearLayout>
 
     <!-- Last Update Text -->

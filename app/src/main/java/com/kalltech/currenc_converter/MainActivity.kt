@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.kalltech.currenc_converter.database.AppDatabase
 import com.kalltech.currenc_converter.model.Currency
+import com.google.android.material.textfield.TextInputLayout
+import android.widget.AutoCompleteTextView
 import com.kalltech.currenc_converter.network.ApiClient
 import com.kalltech.currenc_converter.repository.ExchangeRateRepository
 import com.kalltech.currenc_converter.utils.Constants
@@ -23,10 +25,11 @@ import com.google.android.material.snackbar.Snackbar
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
     private lateinit var amountEditTexts: List<EditText>
-    private lateinit var currencySpinners: List<Spinner>
+    private lateinit var currencyAutoCompleteTexts: List<AutoCompleteTextView>
     private lateinit var lastUpdateTextView: TextView
     private lateinit var rootView: View
     private lateinit var ratesInfoTextView: TextView
+
 
 
     private val viewModel: MainViewModel by viewModels {
@@ -67,10 +70,10 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.amountEditText3)
         )
 
-        currencySpinners = listOf(
-            findViewById(R.id.currencySpinner1),
-            findViewById(R.id.currencySpinner2),
-            findViewById(R.id.currencySpinner3)
+        currencyAutoCompleteTexts = listOf(
+            findViewById(R.id.currencyAutoComplete1),
+            findViewById(R.id.currencyAutoComplete2),
+            findViewById(R.id.currencyAutoComplete3)
         )
 
         lastUpdateTextView = findViewById(R.id.lastUpdateTextView)
@@ -82,46 +85,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCurrencySpinners() {
-        Log.d(TAG, "setupCurrencySpinners() called")
-        // Load currency list (in a real app, this might come from a data source)
-        val currencyList = listOf(
-            Currency("USD", "United States Dollar"),
-            Currency("EUR", "Euro"),
-            Currency("AUD", "Australian Dollar"),
-            // Add more currencies as needed
-        )
+    Log.d(TAG, "setupCurrencySpinners() called")
+    val currencyList = CurrencyUtils.loadCurrencies(this)
 
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            currencyList.map { it.name }
-        )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    val adapter = ArrayAdapter(
+        this,
+        android.R.layout.simple_dropdown_item_1line,
+        currencyList.map { "${it.code} - ${it.name}" }
+    )
 
-        for (i in currencySpinners.indices) {
-            currencySpinners[i].adapter = adapter
-            val selectedCurrency = viewModel.selectedCurrencies.value?.get(i)
-            val position = currencyList.indexOfFirst { it.code == selectedCurrency?.code }
-            currencySpinners[i].setSelection(position)
+    for (i in currencyAutoCompleteTexts.indices) {
+        currencyAutoCompleteTexts[i].setAdapter(adapter)
 
-            currencySpinners[i].onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    val currency = currencyList[position]
-                    Log.d(TAG, "Currency selected: ${currency.code}")
-                    viewModel.onCurrencyChanged(i, currency)
-                }
+        // Set default currency
+        val selectedCurrencyCode = viewModel.selectedCurrencies.value?.get(i)?.code ?: "USD"
+        val position = currencyList.indexOfFirst { it.code == selectedCurrencyCode }
+        if (position >= 0) {
+            currencyAutoCompleteTexts[i].setText(
+                "${currencyList[position].code} - ${currencyList[position].name}",
+                false
+            )
+        }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                Log.d(TAG, "Nothing selected in spinner")
-                }
-            }
+        currencyAutoCompleteTexts[i].setOnItemClickListener { parent, view, position, id ->
+            val currency = currencyList[position]
+            Log.d(TAG, "Currency selected: ${currency.code}")
+            viewModel.onCurrencyChanged(i, currency)
         }
     }
+}
+
 
     private fun setupAmountEditTexts() {
         for (i in amountEditTexts.indices) {
