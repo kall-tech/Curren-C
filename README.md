@@ -13,4 +13,5 @@ The app shall have three input fields which automatically update whenever you ty
 - ChatGPT-o1 is good at providing a project outline as well, and told me what to write into which file (~20 files) in one single answer. Even the layout .xml looked good on the first try.
 - However, it did not perform good on adding dependencies, especially when prompted to use a version libray(link). It seemed to sometimes get confused between Groovy and Kotlin. In the end I had to add them manually, a painful thing and I imagine it could be a dealbreaker for people who don't know anything about coding.
 - I had to let it fix several things: dependencies, permissions, (add)logging
+- ChatGPT-o1 often assumed that I know where to put the code it suggests, saying things like "in MainActivity, add this line: <code>" without specifying where exactly
 - Gemini and ChatGPT-o1 often suggested very similiar solutions to error messages, I ended up mainly using Gemini for that, as it is nicely embedded into Android Studio and thus easier to use.
