@@ -105,15 +105,34 @@
     </LinearLayout>
 
     <!-- Last Update Text -->
-    <TextView
-        android:id="@+id/lastUpdateTextView"
+    <LinearLayout
+        android:id="@+id/lastUpdateLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Rates last updated: --"
+        android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@id/currencyLayout3"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="32dp" />
-    <!--Todo: make toggleable-->
+        android:layout_marginTop="32dp">
+
+        <TextView
+            android:id="@+id/lastUpdateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rates last updated: --" />
+
+        <ImageButton
+            android:id="@+id/refreshButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_refresh"
+            android:contentDescription="Refresh"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="8dp" />
+
+
+
+
+    <!-- Ratesinfo Todo: make toggleable-->
     <TextView
         android:id="@+id/ratesInfoTextView"
         android:layout_width="wrap_content"
@@ -122,5 +141,6 @@
         app:layout_constraintTop_toBottomOf="@id/lastUpdateTextView"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="16dp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
