@@ -29,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lastUpdateTextView: TextView
     private lateinit var rootView: View
     private lateinit var ratesInfoTextView: TextView
+    private lateinit var refreshButton: ImageButton
+
 
 
 
@@ -77,6 +79,10 @@ class MainActivity : AppCompatActivity() {
         )
 
         lastUpdateTextView = findViewById(R.id.lastUpdateTextView)
+        refreshButton = findViewById(R.id.refreshButton)
+        refreshButton.setOnClickListener {
+            viewModel.forceUpdateExchangeRates()
+        }
         ratesInfoTextView = findViewById(R.id.ratesInfoTextView)
 
         setupCurrencySpinners()
@@ -155,5 +161,17 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "Error: $message")
             Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show()
         })
+
+        viewModel.isUpdating.observe(this, Observer { updating ->
+            refreshButton.isEnabled = !updating
+            if (updating) {
+                // Optionally show a loading indicator
+                refreshButton.animate().rotationBy(360f).setDuration(1000).start()
+            } else {
+                refreshButton.animate().cancel()
+                refreshButton.rotation = 0f
+            }
+        })
+
     }
 }

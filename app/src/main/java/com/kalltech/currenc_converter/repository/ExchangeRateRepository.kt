@@ -55,6 +55,32 @@ class ExchangeRateRepository(
         }
     }
 
+    suspend fun forceUpdateExchangeRates(): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getLatestRates(Constants.API_KEY, "USD")
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null && body.result == "success") {
+                        val rates = body.conversionRates?.map {
+                            ExchangeRateEntity(it.key, it.value)
+                        } ?: emptyList()
+                        exchangeRateDao.insertRates(rates)
+                        lastUpdateDao.insertLastUpdate(LastUpdateEntity(timestamp = System.currentTimeMillis()))
+                        Result.success(Unit)
+                    } else {
+                        Result.failure(Exception("API Error"))
+                    }
+                } else {
+                    Result.failure(Exception("Network Error"))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+
     suspend fun getCachedRates(): List<ExchangeRateEntity> {
         return withContext(Dispatchers.IO) {
             val rates = exchangeRateDao.getAllRates()

@@ -95,4 +95,30 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
         val formattedTime = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
         lastUpdateTime.postValue("Rates last updated: $formattedTime")
     }
+
+    fun forceUpdateExchangeRates() {
+        viewModelScope.launch {
+            isUpdating.postValue(true)
+            val result = repository.forceUpdateExchangeRates()
+            if (result.isFailure) {
+                errorMessage.postValue("Failed to update rates.")
+            } else {
+                exchangeRates = repository.getCachedRates()
+                updateLastUpdateTime()
+                // Recalculate conversions if needed
+                val amounts = inputAmounts.value ?: listOf("", "", "")
+                amounts.forEachIndexed { index, amount ->
+                    if (amount.isNotBlank() && amount.toDoubleOrNull() != null) {
+                        calculateConversions(index, amount.toDouble())
+                        return@forEachIndexed
+                    }
+                }
+            }
+            isUpdating.postValue(false)
+        }
+    }
+
+    // Add LiveData to track updating state
+    val isUpdating = MutableLiveData<Boolean>(false)
+
 }
