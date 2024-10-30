@@ -9,7 +9,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 object ApiClient {
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BASIC
+        level = HttpLoggingInterceptor.Level.BODY
     }
 
     private val httpClient = OkHttpClient.Builder()
