@@ -3,6 +3,7 @@ package com.kalltech.currenc_converter
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.viewModels
@@ -20,11 +21,13 @@ import com.kalltech.currenc_converter.viewmodel.MainViewModel
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
-
+    private val TAG = "MainActivity"
     private lateinit var amountEditTexts: List<EditText>
     private lateinit var currencySpinners: List<Spinner>
     private lateinit var lastUpdateTextView: TextView
     private lateinit var rootView: View
+    private lateinit var ratesInfoTextView: TextView
+
 
     private val viewModel: MainViewModel by viewModels {
         val database = Room.databaseBuilder(
@@ -51,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate() called")
         super.onCreate(savedInstanceState)
         // Using setContentView with data binding
         setContentView(R.layout.activity_main)
@@ -70,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         lastUpdateTextView = findViewById(R.id.lastUpdateTextView)
+        ratesInfoTextView = findViewById(R.id.ratesInfoTextView)
 
         setupCurrencySpinners()
         setupAmountEditTexts()
@@ -77,6 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCurrencySpinners() {
+        Log.d(TAG, "setupCurrencySpinners() called")
         // Load currency list (in a real app, this might come from a data source)
         val currencyList = listOf(
             Currency("USD", "United States Dollar"),
@@ -106,10 +112,13 @@ class MainActivity : AppCompatActivity() {
                     id: Long
                 ) {
                     val currency = currencyList[position]
+                    Log.d(TAG, "Currency selected: ${currency.code}")
                     viewModel.onCurrencyChanged(i, currency)
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {}
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                Log.d(TAG, "Nothing selected in spinner")
+                }
             }
         }
     }
@@ -121,10 +130,8 @@ class MainActivity : AppCompatActivity() {
                 override fun afterTextChanged(s: Editable?) {}
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    amountEditTexts.forEachIndexed { index, editText ->
-                        if (editText.hasFocus()) {
-                            viewModel.onAmountChanged(index, s.toString())
-                        }
+                    if (amountEditTexts[i].hasFocus()) {
+                        viewModel.onAmountChanged(i, s.toString())
                     }
                 }
             })
@@ -132,6 +139,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
+        Log.d(TAG, "observeViewModel() called")
         viewModel.convertedAmounts.observe(this, Observer { amounts ->
             for (i in amountEditTexts.indices) {
                 if (!amountEditTexts[i].hasFocus()) {
@@ -146,7 +154,12 @@ class MainActivity : AppCompatActivity() {
             lastUpdateTextView.text = timeString
         })
 
+        viewModel.ratesInfo.observe(this, Observer { info ->
+            ratesInfoTextView.text = info
+        })
+
         viewModel.errorMessage.observe(this, Observer { message ->
+            Log.e(TAG, "Error: $message")
             Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show()
         })
     }
