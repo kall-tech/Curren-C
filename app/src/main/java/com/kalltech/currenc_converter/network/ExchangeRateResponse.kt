@@ -1,7 +1,9 @@
 package com.kalltech.currenc_converter.network
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true) //This tells Moshi to generate an adapter for your data class at compile time, which can resolve parsing issues.
 data class ExchangeRateResponse(
     val result: String,
     val documentation: String?,
@@ -26,3 +28,4 @@ data class ErrorResponse(
     @Json(name = "error-type")
     val errorType: String
 )
+
