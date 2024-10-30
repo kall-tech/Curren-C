@@ -82,4 +82,5 @@ dependencies {
     implementation(libs.material)
     //
     implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
 }
