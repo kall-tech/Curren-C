@@ -16,19 +16,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <!-- Using TextInputLayout instead of EditText for a style test -->
-        <com.google.android.material.textfield.TextInputLayout
+        <EditText
+            android:id="@+id/amountEditText1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Amount">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/amountEditText1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:hint="Amount"
+            android:inputType="numberDecimal" />
 
         <TextView
             android:id="@+id/currencySymbolTextView1"
