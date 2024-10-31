@@ -8,7 +8,7 @@ I used the [Android Basics with Compose Course](https://developer.android.com/co
 The app shall be a minimal and easy to use app for converting currencies on the go. 
 The app shall have three input fields which automatically update whenever you type in them and query an API (I used the [exchangerate-api](https://www.exchangerate-api.com/docs/java-currency-api) but plan on using [frankfurter](https://frankfurter.dev)) once a week to get the newest conversion rates and using cached ones otherwise. Currency codes json gladly taken from [here](https://github.com/ourworldincode/currency/tree/main)
 
-## Learnings so far
+## Learnings
 - I gave detailed instructions and prompted to ask clarifying questions first before starting to code. ChatGPT-o1 obeys and asks good questions to clarify. I will use this approach in further projects too.
 - ChatGPT-o1 is good at providing a project outline as well, and told me what to write into which file (~20 files) in one single answer. Even the layout .xml looked good on the first try.
 - However, it did not perform good on adding dependencies, especially when prompted to use a [version libray](https://developer.android.com/build/dependencies#add-dependency). It seemed to sometimes get confused between Groovy and Kotlin. In the end I had to add them manually, a painful thing and I imagine it could be a dealbreaker for people who don't know anything about coding.
