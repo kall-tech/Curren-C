@@ -23,6 +23,9 @@ import com.kalltech.currenc_converter.utils.Constants
 import com.kalltech.currenc_converter.utils.CurrencyUtils
 import com.kalltech.currenc_converter.viewmodel.MainViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.kalltech.currenc_converter.adapter.CurrencyAutoCompleteAdapter
+
+
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -105,36 +108,41 @@ class MainActivity : AppCompatActivity() {
     private fun setupCurrencySpinners() {
         Log.d(TAG, "setupCurrencySpinners() called")
         val currencyList = CurrencyUtils.loadCurrencies(this)
+        Log.d(TAG, "Number of currencies loaded: ${currencyList.size}")
 
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            currencyList.map { "${it.code} - ${it.name}" }
-        )
+        val adapter = CurrencyAutoCompleteAdapter(this, currencyList)
 
         for (i in currencyAutoCompleteTexts.indices) {
             currencyAutoCompleteTexts[i].setAdapter(adapter)
 
             // Set default currency
             val selectedCurrencyCode = viewModel.selectedCurrencies.value?.get(i)?.code ?: "USD"
-            val position = currencyList.indexOfFirst { it.code == selectedCurrencyCode }
-            if (position >= 0) {
-                currencyAutoCompleteTexts[i].setText(
-                    "${currencyList[position].code} - ${currencyList[position].name}",
-                    false
-                )
+            val defaultCurrency = currencyList.find { it.code == selectedCurrencyCode }
+            if (defaultCurrency != null) {
+                currencyAutoCompleteTexts[i].setText(defaultCurrency.code, false)
+                // Update the symbol display
+                //currencySymbolTextViews[i].text = "${defaultCurrency.symbol} (${defaultCurrency.code})"
+                currencySymbolTextViews[i].text = defaultCurrency.symbol
             }
 
             currencyAutoCompleteTexts[i].setOnItemClickListener { parent, view, position, id ->
-            val currency = currencyList[position]
-            Log.d(TAG, "Currency selected: ${currency.code}")
-            viewModel.onCurrencyChanged(i, currency)
-            currencySymbolTextViews[i].text = "${currency.symbol} (${currency.code})"
-            }
+                val selectedCurrency = adapter.getItem(position)
+                if (selectedCurrency != null) {
+                    viewModel.onCurrencyChanged(i, selectedCurrency)
+                    Log.d(TAG, "Currency selected: ${selectedCurrency.code}")
 
-            // Set initial symbol
-            val initialCurrency = currencyList[position]
-            currencySymbolTextViews[i].text = "${initialCurrency.symbol} (${initialCurrency.code})"
+                    // Update the symbol display
+                    //currencySymbolTextViews[i].text = "${selectedCurrency.symbol} (${selectedCurrency.code})"
+                    currencySymbolTextViews[i].text = selectedCurrency.symbol
+
+                    //update the CurrencyAutoCompleteTextView
+                    currencyAutoCompleteTexts[i].setText(selectedCurrency.code, false)
+                }
+                // Set initial symbol
+                //val initialCurrency = currencyList[position]
+                //currencySymbolTextViews[i].text =
+                    //"${initialCurrency.symbol} (${initialCurrency.code})"
+            }
         }
     }
 
