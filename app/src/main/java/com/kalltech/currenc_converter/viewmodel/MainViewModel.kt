@@ -18,6 +18,7 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
     val lastUpdateTime = MutableLiveData<String>()
     val errorMessage = MutableLiveData<String>()
     val ratesInfo = MutableLiveData<String>()
+    private var lastEditedIndex: Int = 0 // Default to first field
 
 
     private var exchangeRates: List<ExchangeRateEntity> = emptyList()
@@ -53,6 +54,7 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
         amounts[index] = amount
         inputAmounts.value = amounts
         if (amount.isNotBlank() && amount.toDoubleOrNull() != null) {
+            lastEditedIndex = index // Update last edited index
             calculateConversions(index, amount.toDouble())
         } else {
             errorMessage.postValue("Please enter a valid number.")
@@ -63,17 +65,29 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
         val currencies = selectedCurrencies.value?.toMutableList() ?: mutableListOf()
         currencies[index] = currency
         selectedCurrencies.value = currencies
-        val amountStr = inputAmounts.value?.get(index)
-        if (!amountStr.isNullOrBlank() && amountStr.toDoubleOrNull() != null) {
-            calculateConversions(index, amountStr.toDouble())
+
+        val amounts = inputAmounts.value ?: listOf("", "", "")
+        val lastAmountStr = amounts[lastEditedIndex]
+
+        if (lastAmountStr.isNotBlank() && lastAmountStr.toDoubleOrNull() != null) {
+            val lastAmount = lastAmountStr.toDouble()
+            calculateConversions(lastEditedIndex, lastAmount)
         }
     }
 
+
     private fun calculateConversions(inputIndex: Int, amount: Double) {
+         if (exchangeRates.isEmpty()) {
+                errorMessage.postValue("Exchange rates not available.")
+                return
+         }
         val currencies = selectedCurrencies.value ?: return
         val baseCurrencyCode = currencies[inputIndex].code
         val baseRate = exchangeRates.find { it.currencyCode == baseCurrencyCode }?.rate ?: return
-
+        if (baseRate == null) {
+            errorMessage.postValue("Exchange rate not available for $baseCurrencyCode.")
+            return
+        }
         val newAmounts = mutableListOf<String>("", "", "")
 
         for (i in 0..2) {
@@ -82,12 +96,16 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
             } else {
                 val targetCurrencyCode = currencies[i].code
                 val targetRate = exchangeRates.find { it.currencyCode == targetCurrencyCode }?.rate ?: continue
+            if (targetRate != null) {
                 val convertedAmount = (amount / baseRate) * targetRate
                 val roundedAmount = BigDecimal(convertedAmount).setScale(2, RoundingMode.HALF_EVEN)
                 newAmounts[i] = roundedAmount.toPlainString()
+            } else {
+                newAmounts[i] = "N/A"
             }
         }
         convertedAmounts.postValue(newAmounts)
+    }
     }
 
     private suspend fun updateLastUpdateTime() {
