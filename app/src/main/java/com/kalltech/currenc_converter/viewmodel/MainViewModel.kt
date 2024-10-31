@@ -17,8 +17,10 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
     val convertedAmounts = MutableLiveData<List<String>>(listOf("", "", ""))
     val lastUpdateTime = MutableLiveData<String>()
     val errorMessage = MutableLiveData<String>()
+    val successMessage = MutableLiveData<String>()
     val ratesInfo = MutableLiveData<String>()
     private var lastEditedIndex: Int = 0 // Default to first field
+    val baseCurrency = "USD" // You can change the base currency as needed
 
 
     private var exchangeRates: List<ExchangeRateEntity> = emptyList()
@@ -33,7 +35,7 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
 
         // Load exchange rates
         viewModelScope.launch {
-            val baseCurrency = "USD" // You can change the base currency as needed
+
             val result = repository.updateExchangeRates(baseCurrency)
             if (result.isFailure) {
                 errorMessage.postValue("Failed to update rates.")
@@ -44,6 +46,7 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
                 val ratesSummary = exchangeRates.joinToString(separator = "\n") {
                     "${it.currencyCode}: ${it.rate}"
                 }
+                successMessage.postValue("Exchange rates updated successfully.")
                 ratesInfo.postValue(ratesSummary)
             }
         }
@@ -117,7 +120,7 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
     fun forceUpdateExchangeRates() {
         viewModelScope.launch {
             isUpdating.postValue(true)
-            val result = repository.forceUpdateExchangeRates()
+            val result = repository.forceUpdateExchangeRates(baseCurrency)
             if (result.isFailure) {
                 errorMessage.postValue("Failed to update rates.")
             } else {
@@ -131,8 +134,10 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
                         return@forEachIndexed
                     }
                 }
+                successMessage.postValue("Exchange rates updated successfully.")
             }
             isUpdating.postValue(false)
+
         }
     }
 

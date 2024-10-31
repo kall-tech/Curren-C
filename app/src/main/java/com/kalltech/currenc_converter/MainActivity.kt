@@ -187,6 +187,11 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show()
         })
 
+        viewModel.successMessage.observe(this, Observer { message ->
+            Snackbar.make(rootView, message, Snackbar.LENGTH_SHORT).show()
+        })
+
+
         viewModel.isUpdating.observe(this, Observer { updating ->
             refreshButton.isEnabled = !updating
             if (updating) {
