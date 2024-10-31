@@ -1,5 +1,6 @@
 package com.kalltech.currenc_converter
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -31,6 +32,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rootView: View
     private lateinit var ratesInfoTextView: TextView
     private lateinit var refreshButton: ImageButton
+    private lateinit var currencySymbolTextViews: List<TextView>
+
 
 
 
@@ -79,6 +82,13 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.currencyAutoComplete3)
         )
 
+        currencySymbolTextViews = listOf(
+            findViewById(R.id.currencySymbolTextView1),
+            findViewById(R.id.currencySymbolTextView2),
+            findViewById(R.id.currencySymbolTextView3)
+        )
+
+
         lastUpdateTextView = findViewById(R.id.lastUpdateTextView)
         refreshButton = findViewById(R.id.refreshButton)
         refreshButton.setOnClickListener {
@@ -91,36 +101,42 @@ class MainActivity : AppCompatActivity() {
         observeViewModel()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setupCurrencySpinners() {
-    Log.d(TAG, "setupCurrencySpinners() called")
-    val currencyList = CurrencyUtils.loadCurrencies(this)
+        Log.d(TAG, "setupCurrencySpinners() called")
+        val currencyList = CurrencyUtils.loadCurrencies(this)
 
-    val adapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        currencyList.map { "${it.code} - ${it.name}" }
-    )
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            currencyList.map { "${it.code} - ${it.name}" }
+        )
 
-    for (i in currencyAutoCompleteTexts.indices) {
-        currencyAutoCompleteTexts[i].setAdapter(adapter)
+        for (i in currencyAutoCompleteTexts.indices) {
+            currencyAutoCompleteTexts[i].setAdapter(adapter)
 
-        // Set default currency
-        val selectedCurrencyCode = viewModel.selectedCurrencies.value?.get(i)?.code ?: "USD"
-        val position = currencyList.indexOfFirst { it.code == selectedCurrencyCode }
-        if (position >= 0) {
-            currencyAutoCompleteTexts[i].setText(
-                "${currencyList[position].code} - ${currencyList[position].name}",
-                false
-            )
-        }
+            // Set default currency
+            val selectedCurrencyCode = viewModel.selectedCurrencies.value?.get(i)?.code ?: "USD"
+            val position = currencyList.indexOfFirst { it.code == selectedCurrencyCode }
+            if (position >= 0) {
+                currencyAutoCompleteTexts[i].setText(
+                    "${currencyList[position].code} - ${currencyList[position].name}",
+                    false
+                )
+            }
 
-        currencyAutoCompleteTexts[i].setOnItemClickListener { parent, view, position, id ->
+            currencyAutoCompleteTexts[i].setOnItemClickListener { parent, view, position, id ->
             val currency = currencyList[position]
             Log.d(TAG, "Currency selected: ${currency.code}")
             viewModel.onCurrencyChanged(i, currency)
+            currencySymbolTextViews[i].text = "${currency.symbol} (${currency.code})"
+            }
+
+            // Set initial symbol
+            val initialCurrency = currencyList[position]
+            currencySymbolTextViews[i].text = "${initialCurrency.symbol} (${initialCurrency.code})"
         }
     }
-}
 
 
     private fun setupAmountEditTexts() {
@@ -155,7 +171,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         viewModel.ratesInfo.observe(this, Observer { info ->
-            ratesInfoTextView.text = info
+            ratesInfoTextView.text = null//info
         })
 
         viewModel.errorMessage.observe(this, Observer { message ->
