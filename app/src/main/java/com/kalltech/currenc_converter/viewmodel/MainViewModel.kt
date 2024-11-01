@@ -42,7 +42,7 @@ class MainViewModel(private val repository: ExchangeRateRepository,
 
             val result = repository.updateExchangeRates(baseCurrency)
             if (result.isFailure) {
-                errorMessage.postValue("Failed to update rates.")
+                errorMessage.postValue("Failed to update rates from ${Constants.DEFAULT_API_PROVIDER.toString()}.")
             } else {
                 exchangeRates = repository.getCachedRates()
                 // Get available currency codes from the repository
@@ -93,14 +93,14 @@ class MainViewModel(private val repository: ExchangeRateRepository,
 
     private fun calculateConversions(inputIndex: Int, amount: Double) {
          if (exchangeRates.isEmpty()) {
-                errorMessage.postValue("Exchange rates not available.")
+                errorMessage.postValue("Exchange rates not available at ${Constants.DEFAULT_API_PROVIDER.toString()}.")
                 return
          }
         val currencies = selectedCurrencies.value ?: return
         val baseCurrencyCode = currencies[inputIndex].code
         val baseRate = exchangeRates.find { it.currencyCode == baseCurrencyCode }?.rate ?: return
         if (baseRate == null) {
-            errorMessage.postValue("Exchange rate not available for $baseCurrencyCode.")
+            errorMessage.postValue("Exchange rate not available for $baseCurrencyCode at ${Constants.DEFAULT_API_PROVIDER.toString()}.")
             return
         }
         val newAmounts = mutableListOf<String>("", "", "")
@@ -126,7 +126,7 @@ class MainViewModel(private val repository: ExchangeRateRepository,
     private suspend fun updateLastUpdateTime() {
         val timestamp = repository.getLastUpdateTime() ?: return
         val formattedTime = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
-        lastUpdateTime.postValue("Rates last updated: $formattedTime")
+        lastUpdateTime.postValue("Rates last updated: ${formattedTime},\nProvider: ${Constants.DEFAULT_API_PROVIDER.toString()}")
     }
 
     fun forceUpdateExchangeRates() {
@@ -134,7 +134,7 @@ class MainViewModel(private val repository: ExchangeRateRepository,
             isUpdating.postValue(true)
             val result = repository.forceUpdateExchangeRates(baseCurrency)
             if (result.isFailure) {
-                errorMessage.postValue("Failed to force update rates.")
+                errorMessage.postValue("Failed to force update rates from ${Constants.DEFAULT_API_PROVIDER}.")
             } else {
                 exchangeRates = repository.getCachedRates()
                 updateLastUpdateTime()
@@ -146,7 +146,7 @@ class MainViewModel(private val repository: ExchangeRateRepository,
                         return@forEachIndexed
                     }
                 }
-                successMessage.postValue("Exchange rates force updated successfully.")
+                successMessage.postValue("Exchange rates force updated successfully from ${Constants.DEFAULT_API_PROVIDER.toString()}.")
             }
             isUpdating.postValue(false)
 

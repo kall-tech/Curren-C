@@ -8,8 +8,16 @@ object Constants {
     const val DATABASE_NAME = "currency_db"
 
     enum class ApiProvider {
-        EXCHANGE_RATE_API,
-        FRANKFURTER_API
+        EXCHANGE_RATE_API {
+            override fun toString(): String {
+                return "Exchange Rate API"
+            }
+        },
+        FRANKFURTER_API {
+            override fun toString(): String {
+                return "Frankfurter API"
+            }
+        }
     }
 
     // Set the default API provider here

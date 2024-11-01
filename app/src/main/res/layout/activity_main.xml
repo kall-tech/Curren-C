@@ -130,21 +130,21 @@
     <!-- Last Update Text -->
     <LinearLayout
         android:id="@+id/lastUpdateLayout"
-        android:layout_width="323dp"
-        android:layout_height="36dp"
+        android:layout_width="327dp"
+        android:layout_height="76dp"
         android:layout_marginTop="32dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/currencyLayout3">
 
+
+        <!-- Ratesinfo Todo: make toggleable-->
         <TextView
             android:id="@+id/lastUpdateTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rates last updated: --" />
+            android:text="Rates last updated: --,\nProvider:" />
 
-
-        <!-- Ratesinfo Todo: make toggleable-->
         <ImageButton
             android:id="@+id/refreshButton"
             android:layout_width="wrap_content"
