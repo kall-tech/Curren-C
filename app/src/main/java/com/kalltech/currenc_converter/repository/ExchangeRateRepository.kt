@@ -59,7 +59,7 @@ class ExchangeRateRepository(
                 val rates = body.conversionRates?.map {
                     ExchangeRateEntity(it.key, it.value)
                 } ?: emptyList()
-                exchangeRateDao.insertRates(rates)
+                exchangeRateDao.replaceAllRates(rates)
                 lastUpdateDao.insertLastUpdate(LastUpdateEntity(timestamp = System.currentTimeMillis()))
                 // Store available currency codes
                 availableCurrencyCodes = rates.map { it.currencyCode }
@@ -85,12 +85,11 @@ class ExchangeRateRepository(
                 }
                 // Include the base currency with rate 1.0
                 val baseRate = ExchangeRateEntity(body.base, 1.0)
-                exchangeRateDao.insertRates(rates + baseRate)
+                val allRates = rates + baseRate
+                exchangeRateDao.replaceAllRates(allRates)
                 lastUpdateDao.insertLastUpdate(LastUpdateEntity(timestamp = System.currentTimeMillis()))
                 // Store available currency codes
-                availableCurrencyCodes = rates.map { it.currencyCode }
-                // Include the base currency
-                availableCurrencyCodes = availableCurrencyCodes + body.base
+                availableCurrencyCodes = allRates.map { it.currencyCode }
                 // Remove duplicates
                 availableCurrencyCodes = availableCurrencyCodes.distinct()
                 Result.success(Unit)
