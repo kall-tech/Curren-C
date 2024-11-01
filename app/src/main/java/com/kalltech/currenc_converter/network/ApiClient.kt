@@ -24,11 +24,21 @@ object ApiClient {
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(Constants.API_BASE_URL)
-        .client(httpClient)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .build()
 
-    val apiService: ExchangeRateApiService = retrofit.create(ExchangeRateApiService::class.java)
+    val exchangeRateApiService: ExchangeRateApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(Constants.EXCHANGE_RATE_API_BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(ExchangeRateApiService::class.java)
+    }
+
+    // New FrankfurterApiService
+    val frankfurterApiService: FrankfurterApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(Constants.FRANKFURTER_API_BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(FrankfurterApiService::class.java)
+    }
 }

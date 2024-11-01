@@ -51,9 +51,11 @@ class MainActivity : AppCompatActivity() {
         ).build()
 
         val repository = ExchangeRateRepository(
-            ApiClient.apiService,
+            ApiClient.exchangeRateApiService,
+            ApiClient.frankfurterApiService,
             database.exchangeRateDao(),
-            database.lastUpdateDao()
+            database.lastUpdateDao(),
+            Constants.DEFAULT_API_PROVIDER
         )
 
         object : ViewModelProvider.Factory {

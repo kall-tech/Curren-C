@@ -11,18 +11,41 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import android.util.Log
+import com.kalltech.currenc_converter.network.ExchangeRateResponse
+import com.kalltech.currenc_converter.network.FrankfurterApiResponse
+import com.kalltech.currenc_converter.network.FrankfurterApiService
 
 class ExchangeRateRepository(
-    private val apiService: ExchangeRateApiService,
+    private val exchangeRateApiService: ExchangeRateApiService,
+    private val frankfurterApiService: FrankfurterApiService,
     private val exchangeRateDao: ExchangeRateDao,
-    private val lastUpdateDao: LastUpdateDao
-
+    private val lastUpdateDao: LastUpdateDao,
+    private val apiProvider: Constants.ApiProvider = Constants.DEFAULT_API_PROVIDER
 ) {
     private suspend fun fetchAndSaveExchangeRates(baseCurrency: String): Result<Unit> {
-    return try {
-        val response = apiService.getLatestRates(Constants.API_KEY, baseCurrency)
-        if (response.isSuccessful) {
-            Log.d("ExchangeRateRepository", "API call successful")
+        return withContext(Dispatchers.IO) {
+            try {
+                when (apiProvider) {
+                    Constants.ApiProvider.EXCHANGE_RATE_API -> {
+                        val response = exchangeRateApiService.getLatestRates(Constants.API_KEY, baseCurrency)
+                        handleExchangeRateApiResponse(response)
+                    }
+                    Constants.ApiProvider.FRANKFURTER_API -> {
+                        val base = if (baseCurrency == "EUR") null else baseCurrency
+                        val response = frankfurterApiService.getLatestRates(base)
+                        handleFrankfurterApiResponse(response)
+                    }
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    private suspend fun handleExchangeRateApiResponse(
+        response: retrofit2.Response<ExchangeRateResponse>
+    ): Result<Unit> {
+        return if (response.isSuccessful) {
             val body = response.body()
             if (body != null && body.result == "success") {
                 val rates = body.conversionRates?.map {
@@ -32,16 +55,34 @@ class ExchangeRateRepository(
                 lastUpdateDao.insertLastUpdate(LastUpdateEntity(timestamp = System.currentTimeMillis()))
                 Result.success(Unit)
             } else {
-                Log.e("ExchangeRateRepository", "API call failed: ${response.errorBody()?.string()}")
                 Result.failure(Exception("API Error"))
             }
         } else {
             Result.failure(Exception("Network Error"))
         }
-    } catch (e: Exception) {
-        Result.failure(e)
     }
-}
+
+    private suspend fun handleFrankfurterApiResponse(
+        response: retrofit2.Response<FrankfurterApiResponse>
+    ): Result<Unit> {
+        return if (response.isSuccessful) {
+            val body = response.body()
+            if (body != null) {
+                val rates = body.rates.map {
+                    ExchangeRateEntity(it.key, it.value)
+                }
+                // Include the base currency with rate 1.0
+                val baseRate = ExchangeRateEntity(body.base, 1.0)
+                exchangeRateDao.insertRates(rates + baseRate)
+                lastUpdateDao.insertLastUpdate(LastUpdateEntity(timestamp = System.currentTimeMillis()))
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("API Error"))
+            }
+        } else {
+            Result.failure(Exception("Network Error"))
+        }
+    }
     suspend fun updateExchangeRates(baseCurrency: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
                 val lastUpdate = lastUpdateDao.getLastUpdate()
