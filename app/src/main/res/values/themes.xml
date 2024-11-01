@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.CurrencConverter" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.CurrencConverter" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your light theme here -->
+        <!-- Light theme colors -->
+        <item name="colorPrimary">@color/colorPrimaryLight</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariantLight</item>
+        <item name="colorOnPrimary">@color/colorOnPrimaryLight</item>
+        <item name="backgroundColor">@color/colorBackgroundLight</item>
+        <item name="colorOnBackground">@color/colorOnBackgroundLight</item>
+        <!-- Other color attributes -->
+    </style>
+
     <style name="Theme.CurrencConverter_modern" parent="Theme.Material3.Light.NoActionBar">
         <!-- Customize your theme here. >
         <item name="colorPrimary">@color/colorPrimary</item>

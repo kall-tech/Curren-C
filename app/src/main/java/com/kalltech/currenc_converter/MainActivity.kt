@@ -24,7 +24,8 @@ import com.kalltech.currenc_converter.utils.CurrencyUtils
 import com.kalltech.currenc_converter.viewmodel.MainViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.kalltech.currenc_converter.adapter.CurrencyAutoCompleteAdapter
-
+import com.kalltech.currenc_converter.utils.ThemeConstants
+import com.kalltech.currenc_converter.utils.ThemeUtils
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rootView: View
     private lateinit var ratesInfoTextView: TextView
     private lateinit var refreshButton: ImageButton
+    private lateinit var themeToggleButton: ImageButton
     private lateinit var currencySymbolTextViews: List<TextView>
 
 
@@ -67,12 +69,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate() called")
+        ThemeUtils.applyTheme(ThemeUtils.getSavedThemePref(this))
         super.onCreate(savedInstanceState)
         // Using setContentView with data binding
         setContentView(R.layout.activity_main)
 
         rootView = findViewById(android.R.id.content)
-
+    // Textviews here
         amountEditTexts = listOf(
             findViewById(R.id.amountEditText1),
             findViewById(R.id.amountEditText2),
@@ -93,10 +96,16 @@ class MainActivity : AppCompatActivity() {
 
 
         lastUpdateTextView = findViewById(R.id.lastUpdateTextView)
+        //buttons here
         refreshButton = findViewById(R.id.refreshButton)
         refreshButton.setOnClickListener {
             viewModel.forceUpdateExchangeRates()
         }
+        themeToggleButton = findViewById(R.id.themeToggleButton)
+        themeToggleButton.setOnClickListener {
+            cycleTheme()
+        }
+
         ratesInfoTextView = findViewById(R.id.ratesInfoTextView)
 
         setupCurrencySpinners()
@@ -161,6 +170,27 @@ class MainActivity : AppCompatActivity() {
             })
         }
     }
+
+    private fun cycleTheme() {
+        val currentTheme = ThemeUtils.getSavedThemePref(this)
+        val newTheme = when (currentTheme) {
+            ThemeConstants.THEME_MODE_SYSTEM -> ThemeConstants.THEME_MODE_LIGHT
+            ThemeConstants.THEME_MODE_LIGHT -> ThemeConstants.THEME_MODE_DARK
+            ThemeConstants.THEME_MODE_DARK -> ThemeConstants.THEME_MODE_SYSTEM
+            else -> ThemeConstants.THEME_MODE_SYSTEM
+        }
+        ThemeUtils.saveThemePref(this, newTheme)
+        ThemeUtils.applyTheme(newTheme)
+        recreate()
+        // Optional: Show a message indicating the current theme
+        val themeName = when (newTheme) {
+            ThemeConstants.THEME_MODE_LIGHT -> "Light Mode"
+            ThemeConstants.THEME_MODE_DARK -> "Dark Mode"
+            else -> "System Default"
+        }
+        viewModel.successMessage.postValue("Theme switched to $themeName")
+    }
+
 
     private fun observeViewModel() {
         Log.d(TAG, "observeViewModel() called")

@@ -46,7 +46,6 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
                 val ratesSummary = exchangeRates.joinToString(separator = "\n") {
                     "${it.currencyCode}: ${it.rate}"
                 }
-                successMessage.postValue("Exchange rates updated successfully.")
                 ratesInfo.postValue(ratesSummary)
             }
         }
@@ -122,7 +121,7 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
             isUpdating.postValue(true)
             val result = repository.forceUpdateExchangeRates(baseCurrency)
             if (result.isFailure) {
-                errorMessage.postValue("Failed to update rates.")
+                errorMessage.postValue("Failed to force update rates.")
             } else {
                 exchangeRates = repository.getCachedRates()
                 updateLastUpdateTime()
@@ -134,7 +133,7 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
                         return@forEachIndexed
                     }
                 }
-                successMessage.postValue("Exchange rates updated successfully.")
+                successMessage.postValue("Exchange rates force updated successfully.")
             }
             isUpdating.postValue(false)
 
