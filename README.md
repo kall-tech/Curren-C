@@ -19,6 +19,7 @@ The app shall have three input fields which automatically update whenever you ty
 - I also started using Gemini more often for smaller changes, like explaining me why certain modules won't work. A nice bonus was, that it gave links to related stackoverflow or documentation websites as reference, so i could read for myself. This also helped with learning more than the explanations of chatgpt. 
 
 ## Result
+![App_Screenshot.png](App_Screenshot.png)
 I got a working App in about 2 days, which does everything I wanted.
 
 I am impressed at how much I was able to do, even though generating code using ChatGPT is less satisfying as coding on your own - essentially I had to explain a lot to it, and even though it almost always did what I needed it to, sometimes it felt like fixing stuff would've been easier if I knew the codebase and what was going on.
