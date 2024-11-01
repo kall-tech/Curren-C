@@ -6,7 +6,7 @@ I used the [Android Basics with Compose Course](https://developer.android.com/co
 
 ## App overview
 The app shall be a minimal and easy to use app for converting currencies on the go. 
-The app shall have three input fields which automatically update whenever you type in them and query an API (I used the [exchangerate-api](https://www.exchangerate-api.com/docs/java-currency-api) but plan on using [frankfurter](https://frankfurter.dev)) once a week to get the newest conversion rates and using cached ones otherwise. Currency codes json gladly taken from [here](https://github.com/ourworldincode/currency/tree/main)
+The app shall have three input fields which automatically update whenever you type in them and query an API (I used the [exchangerate-api](https://www.exchangerate-api.com/docs/java-currency-api) but plan on using [frankfurter](https://github.com/hakanensari/frankfurter) once a week to get the newest conversion rates and using cached ones otherwise. Currency codes json gladly taken from [here](https://github.com/ourworldincode/currency/tree/main)
 
 ## Learnings
 - I gave detailed instructions and prompted to ask clarifying questions first before starting to code. ChatGPT-o1 obeys and asks good questions to clarify. I will use this approach in further projects too.
