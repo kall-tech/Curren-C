@@ -11,7 +11,7 @@ import java.util.*
 
 class CurrencyAutoCompleteAdapter(
     context: Context,
-    private val currencyList: List<Currency>
+    private var currencyList: List<Currency>
 ) : ArrayAdapter<Currency>(context, android.R.layout.simple_dropdown_item_1line, currencyList) {
 
     private var filteredCurrencyList: List<Currency> = currencyList
@@ -71,5 +71,12 @@ class CurrencyAutoCompleteAdapter(
         val currency = getItem(position)
         (view as TextView).text = "${currency?.code} - ${currency?.name}" // Display code and name
         return view
+    }
+
+    // Function to update the currency list
+    fun updateCurrencyList(newCurrencyList: List<Currency>) {
+        this.currencyList = newCurrencyList
+        this.filteredCurrencyList = newCurrencyList
+        notifyDataSetChanged()
     }
 }

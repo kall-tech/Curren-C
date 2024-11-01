@@ -22,6 +22,13 @@ class ExchangeRateRepository(
     private val lastUpdateDao: LastUpdateDao,
     private val apiProvider: Constants.ApiProvider = Constants.DEFAULT_API_PROVIDER
 ) {
+    private var availableCurrencyCodes: List<String> = emptyList()
+
+    fun getAvailableCurrencyCodes(): List<String> {
+        return availableCurrencyCodes
+    }
+
+
     private suspend fun fetchAndSaveExchangeRates(baseCurrency: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
@@ -37,6 +44,7 @@ class ExchangeRateRepository(
                     }
                 }
             } catch (e: Exception) {
+                Log.e("ExchangeRateRepository", "Error fetching exchange rates", e)
                 Result.failure(e)
             }
         }
@@ -53,6 +61,10 @@ class ExchangeRateRepository(
                 } ?: emptyList()
                 exchangeRateDao.insertRates(rates)
                 lastUpdateDao.insertLastUpdate(LastUpdateEntity(timestamp = System.currentTimeMillis()))
+                // Store available currency codes
+                availableCurrencyCodes = rates.map { it.currencyCode }
+                // Remove duplicates
+                availableCurrencyCodes = availableCurrencyCodes.distinct()
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("API Error"))
@@ -75,6 +87,12 @@ class ExchangeRateRepository(
                 val baseRate = ExchangeRateEntity(body.base, 1.0)
                 exchangeRateDao.insertRates(rates + baseRate)
                 lastUpdateDao.insertLastUpdate(LastUpdateEntity(timestamp = System.currentTimeMillis()))
+                // Store available currency codes
+                availableCurrencyCodes = rates.map { it.currencyCode }
+                // Include the base currency
+                availableCurrencyCodes = availableCurrencyCodes + body.base
+                // Remove duplicates
+                availableCurrencyCodes = availableCurrencyCodes.distinct()
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("API Error"))
@@ -113,12 +131,14 @@ class ExchangeRateRepository(
         return withContext(Dispatchers.IO) {
             val rates = exchangeRateDao.getAllRates()
             logExchangeRates(rates) // Log the rates
+            availableCurrencyCodes = rates.map { it.currencyCode }
             rates
+
         }
     }
 
     private fun logExchangeRates(rates: List<ExchangeRateEntity>) {
-        Log.d("ExchangeRateRepository", "Cached Exchange Rates:")
+        Log.d("ExchangeRateRepository", "${rates.size} Cached Exchange Rates:")
         for (rate in rates) {
             Log.d("ExchangeRateRepository", "  ${rate.currencyCode}: ${rate.rate}")
         }

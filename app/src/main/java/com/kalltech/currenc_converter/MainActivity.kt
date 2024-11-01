@@ -38,12 +38,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var refreshButton: ImageButton
     private lateinit var themeToggleButton: ImageButton
     private lateinit var currencySymbolTextViews: List<TextView>
-
+    private lateinit var currencyAdapters: List<CurrencyAutoCompleteAdapter>
+    private lateinit var currencyMap: Map<String, Currency>
 
 
 
 
     private val viewModel: MainViewModel by viewModels {
+        currencyMap = CurrencyUtils.loadCurrencyMap(this)
+
         val database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
@@ -62,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-                    return MainViewModel(repository) as T
+                    return MainViewModel(repository, currencyMap) as T
                 }
                 throw IllegalArgumentException("Unknown ViewModel class")
             }
@@ -75,6 +78,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // Using setContentView with data binding
         setContentView(R.layout.activity_main)
+
+        currencyMap = CurrencyUtils.loadCurrencyMap(this)
 
         rootView = findViewById(android.R.id.content)
     // Textviews here
@@ -110,49 +115,78 @@ class MainActivity : AppCompatActivity() {
 
         ratesInfoTextView = findViewById(R.id.ratesInfoTextView)
 
-        setupCurrencySpinners()
+        viewModel.availableCurrencies.observe(this, Observer { currencyList ->
+            setupCurrencySpinners(currencyList)
+        })
         setupAmountEditTexts()
         observeViewModel()
     }
 
     @SuppressLint("SetTextI18n")
-    private fun setupCurrencySpinners() {
+    private fun setupCurrencySpinners(currencyList: List<Currency>) {
         Log.d(TAG, "setupCurrencySpinners() called")
-        val currencyList = CurrencyUtils.loadCurrencies(this)
-        Log.d(TAG, "Number of currencies loaded: ${currencyList.size}")
-
-        val adapter = CurrencyAutoCompleteAdapter(this, currencyList)
-
-        for (i in currencyAutoCompleteTexts.indices) {
-            currencyAutoCompleteTexts[i].setAdapter(adapter)
-
-            // Set default currency
-            val selectedCurrencyCode = viewModel.selectedCurrencies.value?.get(i)?.code ?: "USD"
-            val defaultCurrency = currencyList.find { it.code == selectedCurrencyCode }
-            if (defaultCurrency != null) {
-                currencyAutoCompleteTexts[i].setText(defaultCurrency.code, false)
-                // Update the symbol display
-                //currencySymbolTextViews[i].text = "${defaultCurrency.symbol} (${defaultCurrency.code})"
-                currencySymbolTextViews[i].text = defaultCurrency.symbol
+        Log.d(TAG, "Number of currencies passed: ${currencyList.size}")
+        // Create adapters if not initialized
+        if (!::currencyAdapters.isInitialized) {
+            currencyAdapters = currencyAutoCompleteTexts.map {
+                CurrencyAutoCompleteAdapter(this, currencyList)
             }
 
-            currencyAutoCompleteTexts[i].setOnItemClickListener { parent, view, position, id ->
-                val selectedCurrency = adapter.getItem(position)
-                if (selectedCurrency != null) {
-                    viewModel.onCurrencyChanged(i, selectedCurrency)
-                    Log.d(TAG, "Currency selected: ${selectedCurrency.code}")
+            for (i in currencyAutoCompleteTexts.indices) {
+                val autoCompleteTextView = currencyAutoCompleteTexts[i]
+                autoCompleteTextView.setAdapter(currencyAdapters[i])
 
-                    // Update the symbol display
-                    //currencySymbolTextViews[i].text = "${selectedCurrency.symbol} (${selectedCurrency.code})"
+                // Set default or previously selected currency
+                val selectedCurrency = viewModel.selectedCurrencies.value?.get(i)
+                if (selectedCurrency != null && currencyList.contains(selectedCurrency)) {
+                    autoCompleteTextView.setText(selectedCurrency.code, false)
                     currencySymbolTextViews[i].text = selectedCurrency.symbol
-
-                    //update the CurrencyAutoCompleteTextView
-                    currencyAutoCompleteTexts[i].setText(selectedCurrency.code, false)
+                } else {
+                    // Select default currency (e.g., first in list)
+                    val defaultCurrency = currencyList.firstOrNull()
+                    if (defaultCurrency != null) {
+                        autoCompleteTextView.setText(defaultCurrency.code, false)
+                        viewModel.onCurrencyChanged(i, defaultCurrency)
+                    }
                 }
-                // Set initial symbol
-                //val initialCurrency = currencyList[position]
-                //currencySymbolTextViews[i].text =
+
+                autoCompleteTextView.setOnItemClickListener { parent, view, position, id ->
+                    val selectedCurrency = currencyAdapters[i].getItem(position)
+                    if (selectedCurrency != null) {
+                        viewModel.onCurrencyChanged(i, selectedCurrency)
+                        Log.d(TAG, "Currency selected: ${selectedCurrency.code}")
+                        // Update currency symbol display if needed
+                        // currencySymbolTextViews[i].text = "${selectedCurrency.symbol} (${selectedCurrency.code})"
+                        currencySymbolTextViews[i].text = selectedCurrency.symbol
+                        autoCompleteTextView.setText(selectedCurrency.code, false)
+                    }
+                }
+            }
+        } else {
+            // Update existing adapters with new currency list
+            currencyAdapters.forEach { adapter ->
+                adapter.updateCurrencyList(currencyList)
+            }
+
+            // Update AutoCompleteTextViews with the new data
+            for (i in currencyAutoCompleteTexts.indices) {
+                val autoCompleteTextView = currencyAutoCompleteTexts[i]
+                val selectedCurrency = viewModel.selectedCurrencies.value?.get(i)
+                if (selectedCurrency != null && currencyList.contains(selectedCurrency)) {
+                    // Keep current selection
+                    autoCompleteTextView.setText(selectedCurrency.code, false)
+                } else {
+                    // Select default currency
+                    val defaultCurrency = currencyList.firstOrNull()
+                    if (defaultCurrency != null) {
+                        autoCompleteTextView.setText(defaultCurrency.code, false)
+                        viewModel.onCurrencyChanged(i, defaultCurrency)
+                    }
+                    // Set initial symbol
+                    //val initialCurrency = currencyList[position]
+                    //currencySymbolTextViews[i].text =
                     //"${initialCurrency.symbol} (${initialCurrency.code})"
+                }
             }
         }
     }
@@ -205,6 +239,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+
+        viewModel.availableCurrencies.observe(this, Observer { currencyList ->
+            setupCurrencySpinners(currencyList)
+        })
+
 
         viewModel.lastUpdateTime.observe(this, Observer { timeString ->
             lastUpdateTextView.text = timeString

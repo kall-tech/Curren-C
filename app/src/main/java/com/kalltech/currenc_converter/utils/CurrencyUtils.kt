@@ -6,8 +6,8 @@ import org.json.JSONObject
 import java.io.IOException
 
 object CurrencyUtils {
-    fun loadCurrencies(context: Context): List<Currency> {
-        val currencies = mutableListOf<Currency>()
+    fun loadCurrencyMap(context: Context): Map<String, Currency> { //mapping is more efficient
+        val currencyMap = mutableMapOf<String, Currency>()
         try {
             val jsonString = context.assets.open("currencies.json")
                 .bufferedReader()
@@ -19,11 +19,12 @@ object CurrencyUtils {
                 val currencyObject = jsonObject.getJSONObject(code)
                 val name = currencyObject.getString("name")
                 val symbol = currencyObject.optString("symbol", "")
-                currencies.add(Currency(code, name, symbol))
+                val currency = Currency(code, name, symbol)
+                currencyMap[code] = currency
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        return currencies.sortedBy { it.name }
+        return currencyMap
     }
 }

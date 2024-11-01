@@ -4,13 +4,16 @@ import androidx.lifecycle.*
 import com.kalltech.currenc_converter.database.ExchangeRateEntity
 import com.kalltech.currenc_converter.model.Currency
 import com.kalltech.currenc_converter.repository.ExchangeRateRepository
+import com.kalltech.currenc_converter.utils.Constants
+import com.kalltech.currenc_converter.utils.CurrencyUtils
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel() {
+class MainViewModel(private val repository: ExchangeRateRepository,
+                    private val currencyMap: Map<String, Currency>) : ViewModel() {
 
     val inputAmounts = MutableLiveData<List<String>>(listOf("", "", ""))
     val selectedCurrencies = MutableLiveData<List<Currency>>()
@@ -20,7 +23,8 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
     val successMessage = MutableLiveData<String>()
     val ratesInfo = MutableLiveData<String>()
     private var lastEditedIndex: Int = 0 // Default to first field
-    val baseCurrency = "USD" // You can change the base currency as needed
+    val availableCurrencies = MutableLiveData<List<Currency>>()
+    val baseCurrency = Constants.BASE_CURRENCY // You can change the base currency as needed
 
 
     private var exchangeRates: List<ExchangeRateEntity> = emptyList()
@@ -41,6 +45,15 @@ class MainViewModel(private val repository: ExchangeRateRepository) : ViewModel(
                 errorMessage.postValue("Failed to update rates.")
             } else {
                 exchangeRates = repository.getCachedRates()
+                // Get available currency codes from the repository
+                val currencyCodes = repository.getAvailableCurrencyCodes()
+
+                // Map currency codes to Currency objects (using names and symbols)
+                val currencyList = currencyCodes.map { code ->
+                    currencyMap[code] ?: Currency(code, code, "") // Use code as name if not found
+                }
+                // Update LiveData
+                availableCurrencies.postValue(currencyList)
                 updateLastUpdateTime()
                 // Update rates info
                 val ratesSummary = exchangeRates.joinToString(separator = "\n") {
