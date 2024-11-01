@@ -19,8 +19,11 @@ The app shall have three input fields which automatically update whenever you ty
 - I also started using Gemini more often for smaller changes, like explaining me why certain modules won't work. A nice bonus was, that it gave links to related stackoverflow or documentation websites as reference, so i could read for myself. This also helped with learning more than the explanations of chatgpt. 
 
 ## Result
-I got a working App in about 2 days, which did everything I wanted.
-I am impressed at how much I was able to do, even though coding using ChatGPT is less satisfying as doing it oneself - essentially I had to explain a lot to it and even though it almost always did what I needed it to, sometimes it felt like fixing stuff would've been easier if I knew the codebase and what was going on.
+I got a working App in about 2 days, which does everything I wanted.
+
+I am impressed at how much I was able to do, even though generating code using ChatGPT is less satisfying as coding on your own - essentially I had to explain a lot to it, and even though it almost always did what I needed it to, sometimes it felt like fixing stuff would've been easier if I knew the codebase and what was going on.
+
 I knew that ChatGPT-o1 was also able to generate good .xml layouts and non-boilerplate code, but it's still impressing when you see it in action, also compared to experiences I had with coding with ChatGPT4o.
+
 Through debugging together with Gemini and ChatGPT, I knew the structure of the code quite well in the end, even though I did write very little code on my own.
 I guess it would've taken me about 1,5x the time if I would've built the app on my own, but I would've learned a lot more about Kotlin and Android App coding compared to this approach. One could argue that you don't need that knowledge if you can use an LLM for debugging etc., but I still believe it's easier and more fun to do the work oneself. It definitely is more satisfying.
