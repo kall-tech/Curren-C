@@ -198,14 +198,28 @@ class MainActivity : AppCompatActivity() {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun afterTextChanged(s: Editable?) {}
 
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (amountEditTexts[i].hasFocus()) {
-                        viewModel.onAmountChanged(i, s.toString())
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (amountEditTexts[i].hasFocus()) {
+                    // Replace commas with dots
+                    val newText = s.toString().replace(',', '.')
+
+                    // If the text actually changed, update it (this avoids infinite recursion)
+                    if (newText != s.toString()) {
+                        val cursorPosition = amountEditTexts[i].selectionStart
+                        amountEditTexts[i].removeTextChangedListener(this)
+                        amountEditTexts[i].setText(newText)
+                        // Move cursor to the end or to the old position if it’s shorter
+                        amountEditTexts[i].setSelection(minOf(cursorPosition, newText.length))
+                        amountEditTexts[i].addTextChangedListener(this)
+                    } else {
+                        // Normal numeric checks
+                        viewModel.onAmountChanged(i, newText)
                     }
                 }
-            })
-        }
+            }
+        })
     }
+}
 
     private fun cycleTheme() {
         val currentTheme = ThemeUtils.getSavedThemePref(this)

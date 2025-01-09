@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Amount"
+            android:digits="0123456789.,"
             android:inputType="numberDecimal" />
 
         <TextView
@@ -64,6 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Amount"
+            android:digits="0123456789.,"
             android:inputType="numberDecimal" />
 
         <TextView
@@ -104,6 +106,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Amount"
+            android:digits="0123456789.,"
             android:inputType="numberDecimal" />
 
         <TextView
