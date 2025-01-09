@@ -28,3 +28,8 @@ I knew that ChatGPT-o1 was also able to generate good .xml layouts and non-boile
 
 Through debugging together with Gemini and ChatGPT, I knew the structure of the code quite well in the end, even though I did write very little code on my own.
 I guess it would've taken me about 1,5x the time if I would've built the app on my own, but I would've learned a lot more about Kotlin and Android App coding compared to this approach. One could argue that you don't need that knowledge if you can use an LLM for debugging etc., but I still believe it's easier and more fun to do the work oneself. It definitely is more satisfying.
+
+## Open Ends:
+- Make the text independent of using commas or dots
+- Make the app save the last selected currencies
+- Make Api selectable (and ability to add your own api key if needed)
