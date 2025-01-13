@@ -30,12 +30,7 @@ class MainViewModel(private val repository: ExchangeRateRepository,
     private var exchangeRates: List<ExchangeRateEntity> = emptyList()
 
     init {
-        // Set default currencies
-        selectedCurrencies.value = listOf(
-            Currency("EUR", "Euro", "€"),
-            Currency("USD", "United States Dollar", "$"),
-            Currency("AUD", "Australian Dollar", "AU$")
-        )
+        // Set default currencies -> now in MainActivity
 
         // Load exchange rates
         viewModelScope.launch {
@@ -80,7 +75,7 @@ class MainViewModel(private val repository: ExchangeRateRepository,
         val currencies = selectedCurrencies.value?.toMutableList() ?: mutableListOf()
         currencies[index] = currency
         selectedCurrencies.value = currencies
-
+        //saveSelectedCurrencies(currencies)
         val amounts = inputAmounts.value ?: listOf("", "", "")
         val lastAmountStr = amounts[lastEditedIndex]
 
