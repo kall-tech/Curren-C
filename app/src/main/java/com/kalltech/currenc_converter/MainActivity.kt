@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.kalltech.currenc_converter.database.AppDatabase
 import com.kalltech.currenc_converter.model.Currency
-import com.google.android.material.textfield.TextInputLayout
 import android.widget.AutoCompleteTextView
 import com.kalltech.currenc_converter.network.ApiClient
 import com.kalltech.currenc_converter.repository.ExchangeRateRepository
@@ -41,6 +40,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var currencyAdapters: List<CurrencyAutoCompleteAdapter>
     private lateinit var currencyMap: Map<String, Currency>
 
+    companion object { // for saving the currencies
+        private const val PREFS_NAME = "CurrencyPrefs"
+        private const val KEY_CURRENCY_1 = "selected_currency_1"
+        private const val KEY_CURRENCY_2 = "selected_currency_2"
+        private const val KEY_CURRENCY_3 = "selected_currency_3"
+    }
 
 
 
@@ -72,6 +77,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun saveSelectedCurrencies(currencyCodes: List<String>) {
+        val sharedPref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString(KEY_CURRENCY_1, currencyCodes.getOrNull(0) ?: "")
+            putString(KEY_CURRENCY_2, currencyCodes.getOrNull(1) ?: "")
+            putString(KEY_CURRENCY_3, currencyCodes.getOrNull(2) ?: "")
+            apply()
+        }
+    }
+
+    private fun loadSelectedCurrencies(): List<String> {
+        val sharedPref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val c1 = sharedPref.getString(KEY_CURRENCY_1, "EUR") ?: "EUR"
+        val c2 = sharedPref.getString(KEY_CURRENCY_2, "USD") ?: "USD"
+        val c3 = sharedPref.getString(KEY_CURRENCY_3, "AUD") ?: "AUD"
+        return listOf(c1, c2, c3)
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate() called")
         ThemeUtils.applyTheme(ThemeUtils.getSavedThemePref(this))
@@ -101,6 +125,16 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.currencySymbolTextView3)
         )
 
+        // Load the previously selected currencies from SharedPreferences
+        val lastSelectedCodes = loadSelectedCurrencies()
+
+        // Convert them to Currency objects
+        val lastSelectedCurrencies = lastSelectedCodes.map { code ->
+            currencyMap[code] ?: Currency(code, code, "")
+        }
+
+        // Update the ViewModel's selected currencies
+        viewModel.selectedCurrencies.value = lastSelectedCurrencies
 
         lastUpdateTextView = findViewById(R.id.lastUpdateTextView)
         //buttons here
@@ -128,6 +162,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Number of currencies passed: ${currencyList.size}")
         // Create adapters if not initialized
         if (!::currencyAdapters.isInitialized) {
+            // First-time setup
             currencyAdapters = currencyAutoCompleteTexts.map {
                 CurrencyAutoCompleteAdapter(this, currencyList)
             }
@@ -156,14 +191,17 @@ class MainActivity : AppCompatActivity() {
                         viewModel.onCurrencyChanged(i, selectedCurrency)
                         Log.d(TAG, "Currency selected: ${selectedCurrency.code}")
                         // Update currency symbol display if needed
-                        // currencySymbolTextViews[i].text = "${selectedCurrency.symbol} (${selectedCurrency.code})"
                         currencySymbolTextViews[i].text = selectedCurrency.symbol
                         autoCompleteTextView.setText(selectedCurrency.code, false)
+
+                        // Save updated selections to SharedPreferences
+                        val allSelectedCodes = currencyAutoCompleteTexts.map { it.text.toString() }
+                        saveSelectedCurrencies(allSelectedCodes)
                     }
                 }
             }
         } else {
-            // Update existing adapters with new currency list
+            // If adapters are already initialized, update them
             currencyAdapters.forEach { adapter ->
                 adapter.updateCurrencyList(currencyList)
             }
